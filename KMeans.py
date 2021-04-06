@@ -14,62 +14,33 @@ class KMeans:
         self.cluster_centers_ = None
         self.labels_ = None
 
-    def recursive_fit(self, data: np.array) -> None:
-        self.init_variables(data)
-        need_to_iterate = False
+    def fit(self, data: np.array) -> None:
+        self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=float)
+        self.labels_ = np.zeros(shape=(len(data)))
         # "Create a random centroid for each cluster."
         self.determine_cluster_centers(data)
-        # "For each data point identify the closest centroid and assign it to the corresponding cluster."
-        self.label_data(data)
-        # "Compute a new centroid for each cluster based on the current cluster members"
-        self.update_centroids()
-        # "Loop back to step 3 until the assignment of clusters is stable"
 
-        print("Another One")
-        print(self.old_cluster_centers)
-        print()
-        print(self.cluster_centers_)
-
-        if self.old_cluster_centers is None:
-            need_to_iterate = True
-        else:
-            if not np.array_equal(self.old_cluster_centers, self.cluster_centers_):
-                need_to_iterate = True
-
-        if need_to_iterate:
-            self.old_cluster_centers = np.copy(self.cluster_centers_)
-            self.recursive_fit(data)
-
-    def fit(self, data: np.array) -> None:
         while True:
             # Initialise the variables needed per loop
             self.init_variables(data)
-            # "Create a random centroid for each cluster."
-            self.determine_cluster_centers(data)
             # "For each data point identify the closest centroid and assign it to the corresponding cluster."
             self.label_data(data)
             # "Compute a new centroid for each cluster based on the current cluster members"
             self.update_centroids()
 
-            print("Another One")
-            print(self.old_cluster_centers)
-            print()
-            print(self.cluster_centers_)
+            #print("Another One")
+            #print(self.old_cluster_centers)
+            #()
+            #print(self.cluster_centers_)
 
             arrays_equivalent = self.compare_arrays(self.old_cluster_centers, self.cluster_centers_)
-            print("Arrays Equivalent: " + str(arrays_equivalent))
+            #print("Arrays Equivalent: " + str(arrays_equivalent))
             if arrays_equivalent:
                 break
             else:
                 self.old_cluster_centers = np.copy(self.cluster_centers_)
 
     def init_variables(self, data: np.array) -> None:
-        if self.cluster_centers_ is None:
-            self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=float)
-
-        if self.labels_ is None:
-            self.labels_ = np.zeros(shape=(len(data)))
-
         self.points_in_cluster = []
         for i in range(self.n_clusters):
             self.points_in_cluster.append(np.zeros((0, len(data[0])), dtype=int))
