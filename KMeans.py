@@ -56,21 +56,23 @@ class KMeans:
             print()
             print(self.cluster_centers_)
 
-            if np.array_equal(self.old_cluster_centers, self.cluster_centers_):
+            arrays_equivalent = self.compare_arrays(self.old_cluster_centers, self.cluster_centers_)
+            print("Arrays Equivalent: " + str(arrays_equivalent))
+            if arrays_equivalent:
                 break
             else:
                 self.old_cluster_centers = np.copy(self.cluster_centers_)
 
     def init_variables(self, data: np.array) -> None:
         if self.cluster_centers_ is None:
-            self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=int)
+            self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=float)
 
         if self.labels_ is None:
             self.labels_ = np.zeros(shape=(len(data)))
 
         self.points_in_cluster = []
         for i in range(self.n_clusters):
-            self.points_in_cluster.append([])
+            self.points_in_cluster.append(np.zeros((0, len(data[0])), dtype=int))
 
     def determine_cluster_centers(self, data: np.array) -> None:
         # Randomise n different points
@@ -94,7 +96,7 @@ class KMeans:
         for i in range(len(data)):
             index_of_closest_cluster = self.get_closest_cluster(data[i])
             self.labels_[i] = index_of_closest_cluster
-            self.points_in_cluster[index_of_closest_cluster].append(data[i])
+            self.points_in_cluster[index_of_closest_cluster] = np.append(self.points_in_cluster[index_of_closest_cluster], [data[i]], axis=0)
 
     def get_closest_cluster(self, data_point: np.array) -> int:
         # index of closest cluster
@@ -114,13 +116,8 @@ class KMeans:
 
     def update_centroids(self) -> None:
         for i in range(self.n_clusters):
-            # Find average of data point sum
-            average = self.find_average_sum(i)
-            # Find point that has the point sum closest to the
-            data_point = self.get_closest_cluster_point(i, average)
-
-            for j in range(len(data_point)):
-                self.cluster_centers_[i][j] = data_point[j]
+            sum_of_points_in_cluster = self.points_in_cluster[i].sum(axis=0)
+            self.cluster_centers_[i] = sum_of_points_in_cluster/len(self.points_in_cluster[i])
 
     def find_average_sum(self, i: int) -> float:
         sum_so_far = 0
@@ -147,3 +144,21 @@ class KMeans:
                 closest_point = self.points_in_cluster[i][j]
 
         return closest_point
+
+    def compare_arrays(self, array1: np.array, array2: np.array) -> False:
+        if array1 is None or array2 is None:
+            if array1 is None and array2 is None:
+                return True
+            else:
+                return False
+
+        for i in range(len(array1)):
+            found_in_array2 = False
+            for j in range(len(array2)):
+                if np.array_equal(array1[i], array2[j]):
+                    found_in_array2 = True
+
+            if not found_in_array2:
+                return False
+
+        return True
