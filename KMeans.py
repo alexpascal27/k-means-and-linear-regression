@@ -4,8 +4,10 @@ from sklearn.metrics import pairwise_distances_argmin
 
 
 class KMeans:
-    # Storing the cluster from the previous iteration to compare
+    # Storing the cluster centers from the previous iteration to compare
     old_cluster_centers = None
+    # Storing the labels from the previous iteration to compare
+    old_labels = None
 
     def __init__(self, n_clusters: int):
         # number of clusters the user wants split the data into
@@ -33,17 +35,18 @@ class KMeans:
             self.__update_centroids(data)
 
             print("---------")
-            print(self.old_cluster_centers)
-            print(self.cluster_centers_)
+            print(self.old_labels)
+            print(self.labels_)
             print("---------")
 
             # Check if the centroids from the previous iteration is equivalent to the current iteration (means we can stop iterating)
-            arrays_equivalent = np.array_equal(self.old_cluster_centers, self.cluster_centers_)
+            arrays_equivalent = np.array_equal(self.old_labels, self.labels_)
             if arrays_equivalent:
                 break
             # If not, set the old cluster centers to the current centers and repeat the process
             else:
-                self.old_cluster_centers = np.copy(self.cluster_centers_)
+                #self.old_cluster_centers = np.copy(self.cluster_centers_)
+                self.old_labels = np.copy(self.labels_)
 
     def determine_random_cluster_centers(self, data: np.array) -> None:
         # First initialise the arrays with zeros so we don't get index out of range exception
