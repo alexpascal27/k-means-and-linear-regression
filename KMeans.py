@@ -1,7 +1,6 @@
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances_argmin
-import math
 
 
 class KMeans:
@@ -19,7 +18,7 @@ class KMeans:
     def fit(self, data: np.array) -> None:
         """
         Public Function that deals with the K means fitting.
-        :param data:
+        :param data: 2D ndarray containing our data
         :return: we dont return anything, because the user can just access the labels and cluster centers arrays
         """
 
@@ -43,12 +42,11 @@ class KMeans:
     def determine_random_cluster_centers(self, data: np.array) -> None:
         # First initialise the arrays with zeros so we don't get index out of range exception
         self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=float)
+        random_indexes = [random.randrange(0, len(data), 1) for _ in range(self.n_clusters)]
         # Randomise n different points
         for i in range(self.n_clusters):
-            # Randomise an index for the center point
-            index = random.randint(0, len(data))
             # Get data point at that range and set it to a centroid
-            self.cluster_centers_[i] = data[index]
+            self.cluster_centers_[i] = data[random_indexes[i]]
 
     def __update_centroids(self, data: np.array) -> None:
         # initialise the array holding the current sum
