@@ -33,7 +33,7 @@ class KMeans:
             self.__update_centroids(data)
 
             # Check if the centroids from the previous iteration is equivalent to the current iteration (means we can stop iterating)
-            arrays_equivalent = self.__are_centroid_centers_equal(self.cluster_centers_, self.old_cluster_centers, 0.1)
+            arrays_equivalent = self.__are_centroid_centers_equal(self.cluster_centers_, self.old_cluster_centers, 0.01)
             if arrays_equivalent:
                 break
             # If not, set the old cluster centers to the current centers and repeat the process
@@ -50,48 +50,21 @@ class KMeans:
             # Get data point at that range and set it to a centroid
             self.cluster_centers_[i] = data[index]
 
-    def __label_data(self, data: np.array) -> np.array:
-        new_labels_ = np.zeros(shape=(len(data)), dtype=int)
-        # Go through each data point
-        for i in range(len(data)):
-            # Get the closest cluster to the current point
-            index_of_closest_cluster = self.__get_closest_cluster(data[i])
-            # Add to labels array
-            new_labels_[i] = index_of_closest_cluster
-
-        return new_labels_
-
-    def __get_closest_cluster(self, data_point: np.array) -> int:
-        # index of closest cluster
-        i = 0
-        # smallest distance
-        smallest_distance = math.inf
-        # loop through cluster centers and see which is the shortest distance away
-        for j in range(len(self.cluster_centers_)):
-            distance = 0
-            # get the distance between the point and the cluster center
-            for k in range(len(data_point)):
-                distance += abs(self.cluster_centers_[j][k] - data_point[k])
-            # update the smallest distance and update the index of closest cluster so far
-            if distance < smallest_distance:
-                smallest_distance = distance
-                i = j
-        # after looping through all cluster centers the one that has the smallest distance at the end is the closest so return
-        return i
-
     def __update_centroids(self, data: np.array) -> None:
+        # initialise the array holding the current sum
+        sum_of_data_points_per_cluster = np.zeros((self.n_clusters, len(data[0])), dtype=int)
+        # initialise the array that holds the number of points per cluster
+        number_of_points_per_cluster = np.zeros(self.n_clusters, dtype=int)
+
+        # sum up the points in cluster and keep track of how many there are in each cluster
+        for i in range(len(self.labels_)):
+            cluster_index = self.labels_[i]
+            sum_of_data_points_per_cluster[cluster_index] += data[i]
+            number_of_points_per_cluster[cluster_index] += 1
+
         # loop through the clusters centers
         for i in range(len(self.cluster_centers_)):
-            # get the array of indexes for the current cluster
-            array_of_indexes = np.where(self.labels_ == i)[0]
-            # get how many points in cluster
-            n = len(array_of_indexes)
-            # sum up all the points in cluster
-            sum_of_points = np.zeros(len(data[0]), dtype=int)
-            for j in range(len(array_of_indexes)):
-                sum_of_points = np.add(sum_of_points, data[j])
-            # assign the new center
-            self.cluster_centers_[i] = sum_of_points/n
+            self.cluster_centers_[i] = sum_of_data_points_per_cluster[i] / number_of_points_per_cluster[i]
 
     def __are_centroid_centers_equal(self, center1: np.array, center2: np.array, error_tolerance: float) -> bool:
         if center1 is None or center2 is None:
