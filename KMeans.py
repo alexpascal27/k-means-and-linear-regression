@@ -32,7 +32,7 @@ class KMeans:
             self.__update_centroids(data)
 
             # Check if the centroids from the previous iteration is equivalent to the current iteration (means we can stop iterating)
-            arrays_equivalent = self.__are_centroid_centers_equal(self.cluster_centers_, self.old_cluster_centers, 0.01)
+            arrays_equivalent = self.__are_centroid_centers_equal(self.cluster_centers_, self.old_cluster_centers, error_tolerance=0.01)
             if arrays_equivalent:
                 break
             # If not, set the old cluster centers to the current centers and repeat the process
@@ -40,13 +40,12 @@ class KMeans:
                 self.old_cluster_centers = np.copy(self.cluster_centers_)
 
     def determine_random_cluster_centers(self, data: np.array) -> None:
-        # First initialise the arrays with zeros so we don't get index out of range exception
-        self.cluster_centers_ = np.zeros(shape=(self.n_clusters, len(data[0])), dtype=float)
-        random_indexes = [random.randrange(0, len(data), 1) for _ in range(self.n_clusters)]
-        # Randomise n different points
-        for i in range(self.n_clusters):
-            # Get data point at that range and set it to a centroid
-            self.cluster_centers_[i] = data[random_indexes[i]]
+        # Reorder the array randomly
+        reordered_data = np.random.RandomState(self.n_clusters).permutation(len(data))
+        # Pick the first n elements
+        list_of_indexes = [reordered_data[i] for i in range(self.n_clusters)]
+        # Set those elements to self.cluster_centers_
+        self.cluster_centers_ = np.copy(data[list_of_indexes]).astype(float)
 
     def __update_centroids(self, data: np.array) -> None:
         # initialise the array holding the current sum
@@ -65,9 +64,10 @@ class KMeans:
             self.cluster_centers_[i] = sum_of_data_points_per_cluster[i] / number_of_points_per_cluster[i]
 
     def __are_centroid_centers_equal(self, center1: np.array, center2: np.array, error_tolerance: float) -> bool:
+        # if either is None, not equal
         if center1 is None or center2 is None:
             return False
-
+        # check that each point in one center is equivalent to the respective point in the other center array
         for i in range(len(center1)):
             for j in range(len(center1[0])):
                 if not (abs(center1[i][j] - center2[i][j]) <= error_tolerance):
