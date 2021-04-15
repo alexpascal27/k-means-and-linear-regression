@@ -29,6 +29,7 @@ class LinearRegression:
             gamma += x_i
             delta += y_i
 
+        # use beta, gamma, alpha, delta to work out the m and c
         beta_gamma_n_matrix = np.array([[beta, gamma], [gamma, n]])
         alpha_delta_matrix = np.array([[alpha], [delta]])
         m_c_matrix = np.matmul(np.linalg.inv(beta_gamma_n_matrix), alpha_delta_matrix)

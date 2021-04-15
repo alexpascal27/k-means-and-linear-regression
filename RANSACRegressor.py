@@ -21,16 +21,18 @@ class RANSACRegressor:
 
         # loop through all points
         for i in range(n):
-            # get next index so that we get the next point
+            # get next point, find line between input point and get the line's m and c
             m_i, c_i = self.__given_index_get_line(X, y, i)
             # we use this array to store our current inlier mask to compare to the class inlier mask variable
             current_inlier_mask = np.zeros(n, dtype=bool)
+
             # using the m and c calculated find the inliers
             for j in range(n):
                 x_j = X[j][0]
                 y_j = y[j]
                 estimated_y = (m_i * x_j + c_i)
                 current_inlier_mask[j] = self.__is_inlier(estimated_y, y_j)
+
             # see if we have less inliers at this iteration compared to previous iterations
             inliers_now = np.count_nonzero(current_inlier_mask)
             inliers_before = np.count_nonzero(self.inlier_mask_)
@@ -46,6 +48,7 @@ class RANSACRegressor:
     def __given_index_get_line(self, X: np.array, y: np.array, i: int):
         # Find next index
         next_index = self.__find_next_index(i, len(X))
+        # Get the x and y values
         x_1 = X[i][0]
         x_2 = X[next_index][0]
         y_1 = y[i]
@@ -61,6 +64,7 @@ class RANSACRegressor:
         # if last index return first index
         if current_index == (length_of_collection - 1):
             return 0
+        # otherwise return index + 1
         else:
             return current_index + 1
 
